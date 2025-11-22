@@ -1,3 +1,4 @@
+# This contains the database engine used to connect to the database, session and get_db() dependency
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 from app.config import settings
