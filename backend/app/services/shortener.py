@@ -23,13 +23,11 @@ def generate_short_url(index: int) -> str:
 async def shorten_url(
         db: AsyncSession, 
         url: str,
-        custom_code: str | None = None,
-        expiry_days: int | None = None
 ) -> ShortenURLResult: 
     exists = await queries.check_if_url_exists_in_db(db, url)
 
     if exists:
-        return ShortenResult(
+        return ShortenURLResult(
             short_code=exists.short_code,
             already_exists=True,
             original_url=exists.original_url,
@@ -37,6 +35,24 @@ async def shorten_url(
             created_at=exists.created_at,
             expiry=exists.expiry 
         )
-        
+    
+    get_id = queries.get_highest_id(db)+1
+    hashed_value = generate_short_url(get_id) 
+    # Currently not adding any expiry date
+     
+    new_entry = await queries.insert_url(
+        db,
+        original_url = url,
+        short_code = hashed_value,
+    )
+
+    return ShortenURLResult(
+        short_code = new_entry.short_code,
+        already_exists=False,
+        original_url=new_entry.original_url,
+        short_url=f"will_update_later",
+        created_at=new_entry.created_at,
+    )
+
     
     
