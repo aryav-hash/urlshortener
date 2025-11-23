@@ -1,6 +1,6 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.models.url import URL 
+from app.models import URL 
 
 async def check_if_url_exists_in_db(db: AsyncSession, original_url: str) -> bool:
     result = await db.execute(

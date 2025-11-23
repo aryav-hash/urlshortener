@@ -1,7 +1,7 @@
 import asyncio
 from app.db.logic import engine
 from app.db.base import Base
-from app.models.url import URL
+from app.models import URL
 
 async def create_tables():
     async with engine.begin() as conn:
