@@ -1,11 +1,12 @@
 import string
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.db.logic import AsyncSessionLocal
+from datetime import datetime, timedelta
 from app.db import queries
+from app.schemas.shortener import ShortenURLResult
 
 # URL Shortener
 # Let's try to generate a shortened url from a big url like that of an amazon product.
-def generate_url(index: int) -> str: 
+def generate_short_url(index: int) -> str: 
     characters = string.digits + string.ascii_lowercase + string.ascii_uppercase
 
     if index == 0:
@@ -19,11 +20,23 @@ def generate_url(index: int) -> str:
     
     return ''.join(reversed(result))
 
-async def shorten_url(db: AsyncSession, url: str): 
+async def shorten_url(
+        db: AsyncSession, 
+        url: str,
+        custom_code: str | None = None,
+        expiry_days: int | None = None
+) -> ShortenURLResult: 
     exists = await queries.check_if_url_exists_in_db(db, url)
 
-    if exists is None:
-        highest_id = await queries.get_highest_id(db)
-        print(highest_id)
+    if exists:
+        return ShortenResult(
+            short_code=exists.short_code,
+            already_exists=True,
+            original_url=exists.original_url,
+            short_url="will_update_later",
+            created_at=exists.created_at,
+            expiry=exists.expiry 
+        )
+        
     
-
+    
