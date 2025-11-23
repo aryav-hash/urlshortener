@@ -1,12 +1,11 @@
 import string
-from dotenv import load_dotenv
+from sqlalchemy.ext.asyncio import AsyncSession
+from app.db.logic import AsyncSessionLocal
 from app.db import queries
 
 # URL Shortener
 # Let's try to generate a shortened url from a big url like that of an amazon product.
-url = "https://www.amazon.in/Adjustable-Strengthener-Mechanical-Resistance-Workouts/dp/B0FDB3JPVM/?_encoding=UTF8&ref_=pd_hp_d_atf_dealz_cs"
-
-def generate_url(index):
+def generate_url(index: int) -> str: 
     characters = string.digits + string.ascii_lowercase + string.ascii_uppercase
 
     if index == 0:
@@ -20,4 +19,11 @@ def generate_url(index):
     
     return ''.join(reversed(result))
 
-print(f"The result is: {generate_url(999)}")
+async def shorten_url(db: AsyncSession, url: str): 
+    exists = await queries.check_if_url_exists_in_db(db, url)
+
+    if exists is None:
+        highest_id = await queries.get_highest_id(db)
+        print(highest_id)
+    
+
