@@ -1,10 +1,27 @@
-import os
-from dotenv import load_dotenv
+from pydantic_settings import BaseSettings
+from functools import lru_cache
 
-load_dotenv()
+class Settings(BaseSettings):
+    database_connection: str
+    debug: bool = False
+    base_url: str = "http://localhost:5000" # This is the base url for the application
+    secret_key: str = "dev-secret-key" # For setting up future session etc...
 
-class Settings:
-    _db_url = os.getenv("DATABASE_CONNECTION")
-    DATABASE_URL: str = _db_url.replace("postgres://", "postgresql+asyncpg://").replace("sslmode=require", "") if _db_url else None
+    @property
+    def database_url(self) -> str:
+        return (
+            self.database_connection
+            .replace("postgres://", "postgresql+asyncpg://")
+            .replace("?sslmode=require", "")
+        )
+    
+    class Config:
+        env_file = ".env"
+        env_file_encoding = "utf-8"
+        case_sensitive = False
 
-settings = Settings()
+@lru_cache()    
+def get_settings() -> Settings:
+    return Settings()
+
+settings = get_settings()
