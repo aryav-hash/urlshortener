@@ -36,7 +36,7 @@ async def shorten_url(
             expiry=exists.expiry 
         )
     
-    get_id = queries.get_highest_id(db)+1
+    get_id = await queries.get_highest_id(db) + 1
     hashed_value = generate_short_url(get_id) 
     # Currently not adding any expiry date
      
