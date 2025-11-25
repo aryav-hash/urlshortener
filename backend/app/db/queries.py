@@ -10,6 +10,13 @@ async def check_if_url_exists_in_db(db: AsyncSession, original_url: str) -> URL 
     url_record = result.scalar_one_or_none()
     return url_record if url_record is not None else None
 
+async def check_for_short_code(db: AsyncSession, short_code: str) -> URL | None:
+    result = await db.execute(
+        select(URL).where(URL.short_code == short_code)
+    )
+    url_record = result.scaler_one_or_none()
+    return url_record if url_record is not None else None
+
 async def get_highest_id(db: AsyncSession) -> int: 
     result = await db.execute(
         select(func.max(URL.id))
