@@ -10,11 +10,14 @@ class URL(Base):
     original_url = Column(String, nullable=False, unique=True)
     short_code = Column(String, unique=True, nullable=False, index=True)
     created_at = Column(DateTime, default=datetime.utcnow)
-    expiry = Column(DateTime, nullable=True)
+    expiry = Column(DateTime, nullable=False)
 
     # The below represent the URL object better, is helpful and shows actual data.
     def __repr__(self):
         return f"<URL(short_code='{self.short_code}', original_url='{self.original_url}')>"
+    
+    def is_expired(self) -> bool:
+        return datetime.utcnow() > self.expiry
     
     
 

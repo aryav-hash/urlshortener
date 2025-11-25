@@ -7,3 +7,4 @@ class ShortenURLResult(BaseModel):
     original_url: str = Field(..., description="The original long URL")
     short_url: str = Field(..., description="Shortened version of long URL")
     created_at: datetime | None = Field(None, description="When the URL was created")
+    expiry: datetime | None = Field(None, description="When the URL expires")

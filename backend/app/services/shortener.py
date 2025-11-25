@@ -28,7 +28,7 @@ def validate_custom_code(custom_code: str) -> tuple[bool, str | None]:
     if len(custom_code) < 3:
         return False, "Custom code must be at least 3 characters long"
     
-    if len(custom_code) > 15:
+    if len(custom_code) > 20:
         return False, "Custom code must be at most 20 characters long"
     
     if not custom_code.isalnum():
@@ -48,14 +48,17 @@ async def shorten_url(
     exists = await queries.check_if_url_exists_in_db(db, url)
 
     if exists:
-        return ShortenURLResult(
-            short_code=exists.short_code,
-            already_exists=True,
-            original_url=exists.original_url,
-            short_url="will_update_later",
-            created_at=exists.created_at,
-            expiry=exists.expiry 
-        )
+        if exists.is_expired():
+            await queries.delete_url(db, exists.short_code)
+        else:
+            return ShortenURLResult(
+                short_code=exists.short_code,
+                already_exists=True,
+                original_url=exists.original_url,
+                short_url="will_update_later",
+                created_at=exists.created_at,
+                expiry=exists.expiry 
+            )
     
     if custom_code:
         is_valid, error_message = validate_custom_code(custom_code)
@@ -66,16 +69,22 @@ async def shorten_url(
         if check_for_existing_code:
             raise ValueError(f"The entered code '{custom_code} is already in use.'")
         
-        short_code = custom_code
+        code_to_use = custom_code
     else:
         get_id = await queries.get_highest_id(db) + 1
-        hashed_value = generate_short_url(get_id) 
-        # Currently not adding any expiry date
+        code_to_use = generate_short_url(get_id) 
+    
+    # If expiry is not given, then I am going to be giving an expiry of 10 days.
+    if expiry_days is not None:
+        expiry = datetime.utcnow() + timedelta(days=expiry_days)
+    else:
+        expiry = datetime.utcnow() + timedelta(days=10)
      
     new_entry = await queries.insert_url(
         db,
         original_url = url,
-        short_code = hashed_value,
+        short_code = code_to_use,
+        expiry = expiry
     )
 
     return ShortenURLResult(
@@ -84,6 +93,7 @@ async def shorten_url(
         original_url=new_entry.original_url,
         short_url=f"will_update_later",
         created_at=new_entry.created_at,
+        expiry=new_entry.expiry
     )
 
     
