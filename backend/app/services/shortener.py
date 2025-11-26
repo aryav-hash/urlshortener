@@ -7,8 +7,6 @@ from better_profanity import profanity
 
 profanity.load_censor_words()
 
-# URL Shortener
-# Let's try to generate a shortened url from a big url like that of an amazon product.
 def generate_short_url(index: int) -> str: 
     characters = string.digits + string.ascii_lowercase + string.ascii_uppercase
 
@@ -45,6 +43,7 @@ async def shorten_url(
         custom_code: str | None = None,
         expiry_days: int | None = None
 ) -> ShortenURLResult: 
+    
     exists = await queries.check_if_url_exists_in_db(db, url)
 
     if exists:

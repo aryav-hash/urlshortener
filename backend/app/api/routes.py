@@ -1,19 +1,10 @@
-from fastapi import APIRouter
-from pydantic import BaseModel
+from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.resources import RedirectResponse
+from sqlalchemy.ext.asyncio import AsyncSession
+from app.db.logic import get_db
+from app.db import queries
+from app.services import shortener
+from app.schemas.shortener import ShortenRequest, ShortenResponse, ErrorResponse
+from app.config import settings
 
 router = APIRouter()
-
-class ShortenRequest(BaseModel):
-    url: str
-    custom_code: str | None = None
-    expiry : int | None = None
-
-class ShortenResponse(BaseModel):
-    short_url: str
-    code: str
-    created_at: str | None = None
-    expiry: str | None = None
-
-@router.post("/api/shorten/", response_model=ShortenResponse)
-async def shorten(req: ShortenRequest):
-    return 404
