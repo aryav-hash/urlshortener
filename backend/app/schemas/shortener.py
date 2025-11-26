@@ -2,10 +2,7 @@ from pydantic import BaseModel, Field, HttpUrl, validator
 from datetime import datetime
 
 class ShortenRequest(BaseModel):
-    url: HttpUrl = Field(
-        ...,
-        description="URL to shorten"
-    )
+    url: HttpUrl = Field(..., description="URL to shorten")
     custom_code: str | None = Field(
         None, 
         min_length=3,
