@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi.resources import RedirectResponse
+from fastapi.responses import RedirectResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.logic import get_db
 from app.db import queries
@@ -76,3 +76,38 @@ async def create_short_url(
                 "detail": "An unexpected error occurred while creating the short URL"
             }
         )
+    
+@router.get("/{short_code}", 
+            responses={
+                404: {"model": ErrorResponse, "description": "Short URL not found"},
+                410: {"model": ErrorResponse, "description": "Short URL has expired"}
+            },
+            tags=["URL Redirection"]
+)
+async def redirect_to_original_url(
+    short_code: str,
+    db: AsyncSession = Depends(get_db)
+):
+    url_record = await queries.check_for_short_code(db, short_code)
+    if not url_record:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={
+                "error": "NotFound",
+                "detail": f"No URL found for short code: {short_code}"
+            }
+        )
+    
+    if url_record.is_expired():
+        raise HTTPException(
+            status_code=status.HTTP_410_GONE,
+            detail={
+                "error": "Expired",
+                "detail": f"This short URL has expired on {url_record.expiry.isoformat()}"
+            }
+        )
+    
+    return RedirectResponse(
+        url=url_record.original_url,
+        status_code=status.HTTP_302_FOUND
+    )
