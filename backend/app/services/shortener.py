@@ -54,7 +54,7 @@ async def shorten_url(
                 short_code=exists.short_code,
                 already_exists=True,
                 original_url=exists.original_url,
-                short_url="will_update_later",
+                short_url="http://localhost:5000/{short_code}",
                 created_at=exists.created_at,
                 expiry=exists.expiry 
             )
@@ -90,7 +90,7 @@ async def shorten_url(
         short_code = new_entry.short_code,
         already_exists=False,
         original_url=new_entry.original_url,
-        short_url=f"will_update_later",
+        short_url="http://localhost:5000/{short_code}",
         created_at=new_entry.created_at,
         expiry=new_entry.expiry
     )
